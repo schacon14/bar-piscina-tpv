@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bar Piscina">
+  <meta name="theme-color" content="#1e40af">
+  <title>Bar Piscina · TPV</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="styles.css?v=11">
+</head>
+<body>
+  <div id="app">
+
+    <!-- CABECERA -->
+    <header class="header">
+      <div class="header-left">
+        <button class="btn-icon" id="btn-back" style="display:none">&#8592;</button>
+        <div class="logo">
+          <span class="logo-icon">🏊</span>
+          <span class="logo-text" id="header-title">Bar Piscina</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="header-time" id="header-time"></span>
+        <button class="btn-admin" id="btn-admin">⚙️ Admin</button>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <!-- ===== VISTA: MESAS ===== -->
+      <div class="view" id="view-tables">
+        <div class="tables-scroll" id="tables-scroll"></div>
+      </div>
+
+      <!-- ===== VISTA: PEDIDO ===== -->
+      <div class="view hidden" id="view-order">
+        <div class="order-content">
+
+          <!-- Panel izquierdo: productos -->
+          <div class="products-panel">
+            <div class="category-tabs" id="category-tabs"></div>
+            <div class="products-scroll">
+              <div class="products-grid" id="products-grid"></div>
+            </div>
+          </div>
+
+          <!-- Panel derecho: pedido -->
+          <div class="order-panel">
+            <div class="order-panel-header">
+              <span>Pedido</span>
+              <span id="order-count-badge" class="count-badge"></span>
+              <button class="btn-manage" id="btn-manage-table" title="Unir / separar / renumerar mesa">⚙ Mesa</button>
+            </div>
+            <div class="diners-bar">
+              <span class="diners-label">👥 Comensales</span>
+              <div class="diners-controls">
+                <button class="qty-btn minus" onclick="changeDiners(-1)">−</button>
+                <span class="diners-value" id="diners-value">0</span>
+                <button class="qty-btn plus" onclick="changeDiners(1)">+</button>
+              </div>
+            </div>
+            <div class="order-items-list" id="order-items-list"></div>
+            <div class="order-footer">
+              <div class="order-total-row">
+                <span class="order-total-label">Total</span>
+                <span class="order-total-amount" id="order-total-amount">0,00 €</span>
+              </div>
+              <div class="order-btns">
+                <button class="btn btn-outline" id="btn-cuenta" title="Solicitar cuenta">📋 Cuenta</button>
+                <button class="btn btn-outline-blue" id="btn-preview" title="Previsualizar cuenta">👁 Ver</button>
+                <button class="btn btn-danger-sm" id="btn-clear-order" title="Limpiar pedido">🗑</button>
+                <button class="btn btn-success" id="btn-pay">💳 Cobrar</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== VISTA: COBRO ===== -->
+      <div class="view hidden" id="view-payment">
+        <div class="payment-scroll">
+          <div class="payment-card">
+
+            <div class="payment-header">
+              <div class="payment-header-table" id="payment-table-name"></div>
+              <div class="payment-total-display" id="payment-total">0,00 €</div>
+              <div class="payment-summary" id="payment-order-summary"></div>
+            </div>
+
+            <div class="payment-body">
+              <div class="section-label">Forma de pago</div>
+              <div class="payment-methods">
+                <button class="payment-method-btn" data-method="efectivo">
+                  <span class="method-icon">💵</span>
+                  <span>Efectivo</span>
+                </button>
+                <button class="payment-method-btn" data-method="tarjeta">
+                  <span class="method-icon">💳</span>
+                  <span>Tarjeta</span>
+                </button>
+                <button class="payment-method-btn" data-method="bizum">
+                  <span class="method-icon">📱</span>
+                  <span>Bizum</span>
+                </button>
+              </div>
+
+              <div class="cash-section hidden" id="cash-section">
+                <label>Importe entregado</label>
+                <div class="cash-input-row">
+                  <input type="number" class="cash-input" id="cash-input"
+                         placeholder="0.00" step="0.50" min="0" inputmode="decimal">
+                  <span class="cash-euro">€</span>
+                </div>
+                <div class="cash-quick-btns">
+                  <button class="cash-quick-btn" data-amount="exact">Exacto</button>
+                  <button class="cash-quick-btn" data-amount="5">5 €</button>
+                  <button class="cash-quick-btn" data-amount="10">10 €</button>
+                  <button class="cash-quick-btn" data-amount="20">20 €</button>
+                  <button class="cash-quick-btn" data-amount="50">50 €</button>
+                </div>
+                <div class="change-row">
+                  <span class="change-label">Cambio</span>
+                  <span class="change-amount" id="change-amount">—</span>
+                </div>
+              </div>
+
+              <div class="payment-actions">
+                <button class="btn btn-success btn-xl" id="btn-confirm-payment">✓ Confirmar Cobro</button>
+                <button class="btn btn-secondary" id="btn-print-ticket">🖨 Imprimir Ticket</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VISTA: ADMIN ===== -->
+      <div class="view hidden" id="view-admin">
+        <div class="admin-tab-bar" id="admin-tab-bar">
+          <button class="admin-tab active" data-tab="dashboard">📈 Dashboard</button>
+          <button class="admin-tab" data-tab="ventas">📊 Ventas</button>
+          <button class="admin-tab" data-tab="caja">💰 Caja</button>
+          <button class="admin-tab" data-tab="products">📦 Productos</button>
+          <button class="admin-tab" data-tab="settings">⚙️ Ajustes</button>
+        </div>
+        <div class="admin-content">
+
+          <!-- Tab: Dashboard -->
+          <div class="admin-section active" id="admin-dashboard">
+            <div class="dash-top">
+              <div class="dash-range-tabs">
+                <button class="dash-range-btn active" data-range="7">7 días</button>
+                <button class="dash-range-btn" data-range="14">14 días</button>
+                <button class="dash-range-btn" data-range="30">30 días</button>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btn-export-excel">📊 Exportar a Excel</button>
+            </div>
+            <div id="dash-kpis" class="dash-kpis"></div>
+            <div class="section-label" style="margin:16px 0 8px">Ventas por día</div>
+            <div id="dash-days-chart" class="dash-chart"></div>
+            <div class="section-label" style="margin:16px 0 8px">Top productos</div>
+            <div id="dash-products-chart" class="dash-chart"></div>
+            <div class="section-label" style="margin:16px 0 8px">Por forma de pago</div>
+            <div id="dash-method-chart" class="dash-chart"></div>
+          </div>
+
+          <!-- Tab: Caja / Arqueo -->
+          <div class="admin-section" id="admin-caja">
+            <div class="arqueo-toolbar">
+              <div class="settings-item-info">
+                <div class="settings-item-title">Arqueo de caja</div>
+                <div class="settings-item-desc">Compara las ventas con el dinero contado</div>
+              </div>
+              <input type="date" class="form-input settings-input-sm" id="arqueo-date">
+            </div>
+            <div class="section-label" style="margin:16px 0 8px">Ventas del día</div>
+            <div id="arqueo-expected" class="arqueo-box"></div>
+            <div class="arqueo-count">
+              <label>💵 Efectivo contado en caja</label>
+              <div class="cash-input-row">
+                <input type="number" class="cash-input" id="arqueo-cash"
+                       placeholder="0.00" step="0.50" min="0" inputmode="decimal">
+                <span class="cash-euro">€</span>
+              </div>
+            </div>
+            <div id="arqueo-result"></div>
+            <div style="padding:14px 0">
+              <button class="btn btn-primary btn-sm" id="btn-save-arqueo">💾 Guardar arqueo</button>
+            </div>
+            <div class="section-label" style="margin:8px 0">Arqueos guardados</div>
+            <div id="arqueo-history"></div>
+          </div>
+
+          <!-- Tab: Productos -->
+          <div class="admin-section" id="admin-products">
+            <div class="admin-toolbar">
+              <h3>Productos</h3>
+              <button class="btn btn-primary btn-sm" id="btn-add-product">+ Nuevo</button>
+            </div>
+            <div id="products-list"></div>
+          </div>
+
+          <!-- Tab: Ventas -->
+          <div class="admin-section" id="admin-ventas">
+            <div id="summary-cards" class="summary-cards"></div>
+
+            <div class="rank-header">
+              <div class="section-label" style="margin:0">Ventas por producto</div>
+              <div class="rank-range-tabs">
+                <button class="rank-range-btn active" data-range="all">Histórico</button>
+                <button class="rank-range-btn" data-range="today">Hoy</button>
+              </div>
+            </div>
+            <div id="product-ranking"></div>
+
+            <div class="section-label" style="margin:16px 0 8px">Últimas ventas</div>
+            <div id="sales-list"></div>
+            <div style="padding:16px 0">
+              <button class="btn btn-danger btn-sm" id="btn-clear-sales">🗑 Limpiar historial</button>
+            </div>
+          </div>
+
+          <!-- Tab: Ajustes -->
+          <div class="admin-section" id="admin-settings">
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">Nombre fiscal</div>
+                  <div class="settings-item-desc">Aparece en la cabecera del ticket</div>
+                </div>
+                <input type="text" class="form-input settings-input" id="setting-fiscalname"
+                       placeholder="Bar-Piscina Los Cerezos">
+              </div>
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">NIF / CIF</div>
+                  <div class="settings-item-desc">Obligatorio en factura simplificada</div>
+                </div>
+                <input type="text" class="form-input settings-input" id="setting-nif"
+                       placeholder="53256431-T">
+              </div>
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">Dirección</div>
+                  <div class="settings-item-desc">Opcional, se imprime bajo el NIF</div>
+                </div>
+                <input type="text" class="form-input settings-input" id="setting-address"
+                       placeholder="Calle, localidad…">
+              </div>
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">IVA (%)</div>
+                  <div class="settings-item-desc">Hostelería: 10% general</div>
+                </div>
+                <input type="number" class="form-input settings-input-sm" id="setting-iva"
+                       min="0" max="21" step="1" value="10">
+              </div>
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">Mesas de Salón</div>
+                  <div class="settings-item-desc">Se numeran 1, 2, 3… (mesas con sillas)</div>
+                </div>
+                <input type="number" class="form-input settings-input-sm" id="setting-salon-count"
+                       min="1" max="40" value="12">
+              </div>
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">Taburetes de Barra</div>
+                  <div class="settings-item-desc">Se numeran 1, 2, 3… (taburetes de la barra)</div>
+                </div>
+                <input type="number" class="form-input settings-input-sm" id="setting-barra-count"
+                       min="1" max="40" value="6">
+              </div>
+              <div class="settings-item">
+                <div class="settings-item-info">
+                  <div class="settings-item-title">Mostrar piscina</div>
+                  <div class="settings-item-desc">Dibuja la zona de piscina en el plano</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="setting-pool" checked>
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div style="padding:16px 0 4px; display:flex; gap:10px; flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" id="btn-save-settings">💾 Guardar ajustes</button>
+              <button class="btn btn-danger btn-sm" id="btn-reset-all">🗑 Borrar todo y empezar de cero</button>
+            </div>
+            <div class="field-hint" style="margin-bottom:12px">
+              Tus cambios (mesas, productos, cobros…) se <b>guardan solos</b>. El botón rojo
+              <b>no guarda nada</b>: borra TODO y deja la app como recién instalada. Úsalo solo para empezar de cero.
+            </div>
+
+            <div class="help-box">
+              <div class="help-title">💳 Vincular pasarela de pago / TPV</div>
+              <p>Al pulsar <b>Confirmar Cobro</b>, la app registra la venta. Para cobrar con tarjeta de verdad tienes dos vías:</p>
+              <ul>
+                <li><b>Datáfono / TPV físico independiente</b> (recomendado para empezar): sí, con un <b>SumUp</b>, <b>myPOS</b>, <b>Stripe Tap to Pay</b> o el datáfono de tu banco puedes <b>teclear cualquier importe a mano</b> y cobrarlo, sin conectarlo a esta app. Aquí marcas "Tarjeta" para dejar la venta registrada y cobras el importe en el aparato. Cero integración técnica.</li>
+                <li><b>Cobro integrado</b>: con <b>SumUp</b> o <b>Stripe</b> se puede abrir el cobro automáticamente. SumUp tiene un esquema de app móvil (<code>sumupmerchant://pay/1.0?...</code>) y Stripe el <b>Terminal SDK</b>. En España, el TPV bancario clásico usa <b>Redsys</b>. Esto requiere una cuenta de comercio y algo de desarrollo extra; dímelo y lo preparamos.</li>
+              </ul>
+            </div>
+
+            <div class="help-box">
+              <div class="help-title">🖨 Vincular la impresora de tickets</div>
+              <p>El botón <b>Imprimir Ticket</b> usa la impresión del navegador. Opciones:</p>
+              <ul>
+                <li><b>iPad + AirPrint</b>: cualquier impresora AirPrint imprime directa desde Safari. Lo más sencillo.</li>
+                <li><b>Impresora de tickets Bluetooth/USB</b> (ESC/POS, 58/80 mm): conéctala como impresora del sistema y elígela en el diálogo de impresión. Ajusta el ancho del papel en los ajustes del sistema.</li>
+                <li><b>Impresión automática sin diálogo</b>: requiere una integración nativa (Bluetooth ESC/POS o app puente). Si la necesitas, lo montamos.</li>
+              </ul>
+            </div>
+
+            <div class="help-box">
+              <div class="help-title">📲 Instalar como app y usar sin conexión</div>
+              <p>Esta app ya es instalable (PWA):</p>
+              <ul>
+                <li><b>Samsung / Android (Chrome)</b>: menú ⋮ → <b>"Añadir a pantalla de inicio"</b> / "Instalar aplicación".</li>
+                <li><b>iPad / iPhone (Safari)</b>: botón Compartir → <b>"Añadir a pantalla de inicio"</b>.</li>
+                <li>Funciona <b>sin internet</b> una vez abierta: los datos se guardan en el propio dispositivo.</li>
+                <li><b>Importante</b>: cada dispositivo guarda sus datos por separado. Para compartir mesas entre tablet y móvil en tiempo real hace falta un servidor común (te lo explico abajo).</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL: PRODUCTO ===== -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal">
+      <h3 id="modal-product-title">Nuevo Producto</h3>
+      <div class="product-form-top">
+        <div class="product-viz-preview" id="product-viz-preview"></div>
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label>Nombre</label>
+          <input type="text" class="form-input" id="product-name"
+                 placeholder="Ej: Coca-Cola" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio (€)</label>
+          <input type="number" class="form-input" id="product-price"
+                 placeholder="2.50" step="0.10" min="0" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label>Emoji <span class="label-opt">(opcional)</span></label>
+          <input type="text" class="form-input text-center" id="product-emoji"
+                 placeholder="auto" maxlength="4">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select class="form-select" id="product-category">
+          <option value="bebidas">🍹 Bebidas</option>
+          <option value="tapas">🍴 Tapas</option>
+          <option value="comida">🍽 Comida</option>
+          <option value="cena">🌙 Cena</option>
+          <option value="postres">🍰 Postres</option>
+          <option value="helados">🍦 Helados</option>
+          <option value="otros">📦 Otros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Imagen <span class="label-opt">(opcional · URL)</span></label>
+        <input type="url" class="form-input" id="product-image"
+               placeholder="https://… (pega aquí el logo/foto)" autocomplete="off">
+        <div class="field-hint">Si lo dejas vacío se usa el color de la marca conocida (Coca-Cola, Fanta…) o un emoji automático.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancel-product">Cancelar</button>
+        <button class="btn btn-primary" id="btn-save-product">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: PRECIO LIBRE ===== -->
+  <div class="modal-overlay hidden" id="modal-free">
+    <div class="modal">
+      <h3>➕ Producto de precio libre</h3>
+      <div class="form-group">
+        <label>Concepto</label>
+        <input type="text" class="form-input" id="free-name"
+               placeholder="Ej: Varios, Menú del día…" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Precio (€)</label>
+        <input type="number" class="form-input" id="free-price"
+               placeholder="0.00" step="0.10" min="0" inputmode="decimal">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-cancel-free">Cancelar</button>
+        <button class="btn btn-primary" id="btn-add-free">Añadir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: EDITAR LÍNEA ===== -->
+  <div class="modal-overlay hidden" id="modal-edit-item">
+    <div class="modal">
+      <h3>✎ Editar línea</h3>
+      <div class="form-group">
+        <label>Concepto</label>
+        <input type="text" class="form-input" id="edit-item-name" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio (€)</label>
+          <input type="number" class="form-input" id="edit-item-price"
+                 step="0.10" min="0" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" class="form-input text-center" id="edit-item-qty"
+                 step="1" min="1" inputmode="numeric">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="btn-delete-item">🗑 Eliminar</button>
+        <button class="btn btn-primary" id="btn-save-item">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: GESTIÓN DE MESA ===== -->
+  <div class="modal-overlay hidden" id="modal-table">
+    <div class="modal">
+      <h3>⚙ Gestionar mesa</h3>
+      <div class="form-group">
+        <label>Número de la mesa</label>
+        <input type="text" class="form-input" id="table-num-input" autocomplete="off">
+        <div class="field-hint">Cambia el número que se muestra en el plano y en el ticket.</div>
+      </div>
+      <div class="form-group">
+        <label>Unir con otra mesa</label>
+        <div class="merge-row">
+          <select class="form-select" id="merge-target"></select>
+          <button class="btn btn-primary" id="btn-merge">🔗 Unir</button>
+        </div>
+        <div class="field-hint">El pedido de la otra mesa se traslada a ésta y se cobran juntas.</div>
+      </div>
+      <div id="merged-info" class="merged-info"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-table-close">Cerrar</button>
+        <button class="btn btn-primary" id="btn-rename-table">Guardar número</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: PREVISUALIZAR CUENTA ===== -->
+  <div class="modal-overlay hidden" id="modal-preview">
+    <div class="modal modal-preview">
+      <div class="ticket-preview" id="ticket-preview"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-preview-close">Cerrar</button>
+        <button class="btn btn-secondary" id="btn-preview-print">🖨 Imprimir</button>
+        <button class="btn btn-success" id="btn-preview-pay">💳 Cobrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ZONA DE IMPRESIÓN ===== -->
+  <div id="print-ticket" class="print-only"></div>
+
+  <script src="app.js?v=11"></script>
+</body>
+</html>

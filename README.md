@@ -1,4 +1,4 @@
-# Bar-Piscina "Los Cerezos" · TPV
+# Bar-Piscina  · TPV
 
 TPV (punto de venta) web para bar-restaurante de piscina. Pensado para usarse en
 tablet o móvil (iPad / Android), sencillo e intuitivo.

@@ -112,7 +112,7 @@ input, select { font-family: inherit; }
 .zone-tab:active { opacity: .75; }
 
 .tables-scroll {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
   padding: 14px;
   display: flex; flex-direction: column;
 }
@@ -203,7 +203,7 @@ input, select { font-family: inherit; }
 .cat-tab:active { opacity: .75; }
 
 .products-scroll {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px;
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px;
 }
 .products-scroll::-webkit-scrollbar { width: 4px; }
 .products-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -250,7 +250,7 @@ input, select { font-family: inherit; }
 }
 
 .order-items-list {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
 }
 .order-items-list::-webkit-scrollbar { width: 3px; }
 .order-items-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -340,9 +340,9 @@ input, select { font-family: inherit; }
 #view-payment { overflow: hidden; }
 
 .payment-scroll {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 20px 16px;
-  display: flex; justify-content: center;
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px 16px 32px;
+  display: flex; justify-content: center; align-items: flex-start;
 }
 
 .payment-card {
@@ -445,7 +445,7 @@ input, select { font-family: inherit; }
 
 .admin-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .admin-section {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
   padding: 14px; display: none;
 }
 .admin-section.active { display: block; }
@@ -725,7 +725,7 @@ input, select { font-family: inherit; }
     #f8fafc;
   border: 2px solid var(--border); border-radius: 14px;
   padding: 16px; box-shadow: inset 0 2px 12px rgba(0,0,0,.04);
-  flex: 1; min-height: 0;
+  flex: 1 0 auto;
   display: flex; flex-direction: column; gap: 16px;
 }
 
@@ -753,20 +753,19 @@ input, select { font-family: inherit; }
 .rp-stool.merged-child { border-color: #94a3b8; border-style: dashed; color: #64748b; }
 .rp-stool.has-merge { box-shadow: 0 0 0 2px #6366f1, var(--shadow); }
 
-/* --- Salón (mesas) + piscina --- ocupan todo el alto --- */
-.rp-room { flex: 1; min-height: 0; display: flex; gap: 16px; align-items: stretch; }
+/* --- Salón (mesas) + piscina --- */
+.rp-room { flex: 1 0 auto; display: flex; gap: 16px; align-items: stretch; }
 .rp-room-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .rp-zone-label {
   font-size: 11px; font-weight: 800; text-transform: uppercase;
   letter-spacing: 1.2px; color: var(--muted); margin: 0 0 8px; flex-shrink: 0;
 }
-/* Mesas en columnas (siguiendo el plano) */
-.rp-cols { flex: 1; min-height: 0; display: flex; gap: 28px; }
-.rp-col { flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
-.rp-col .rp-table { flex: 1; }
+/* Mesas en columnas (siguiendo el plano), con alto fijo para no solaparse */
+.rp-cols { flex: 0 0 auto; display: flex; gap: 24px; }
+.rp-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 
 .rp-table {
-  position: relative; width: 100%; height: 100%; min-height: 96px;
+  position: relative; width: 100%; height: 120px; flex: 0 0 auto;
   background: transparent; border: none; padding: 0;
   display: flex; align-items: center; justify-content: center;
   transition: transform .1s;
@@ -775,8 +774,8 @@ input, select { font-family: inherit; }
 
 /* pieza cuadrada centrada (mesa + sillas) */
 .rp-piece {
-  position: relative; height: 100%; aspect-ratio: 1.08 / 1;
-  max-width: 100%; max-height: 150px;
+  position: relative; height: 96px; aspect-ratio: 1.12 / 1;
+  max-width: 100%;
   display: flex; align-items: center; justify-content: center;
 }
 
@@ -842,7 +841,7 @@ input, select { font-family: inherit; }
 .rp-pool-emoji { font-size: 38px; z-index: 1; }
 
 .fp-legend {
-  display: flex; gap: 18px; flex-wrap: wrap;
+  display: flex; gap: 18px; flex-wrap: wrap; flex-shrink: 0;
   margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border);
 }
 .fp-legend span { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
@@ -1053,7 +1052,21 @@ input, select { font-family: inherit; }
 .switch input:checked + .switch-slider::before { transform: translateX(22px); }
 
 /* =============================================
-   RESPONSIVE: portrait / tabletas pequeñas
+   RESPONSIVE: tabletas (Samsung / Xiaomi…)
+   ============================================= */
+@media (max-width: 1024px) {
+  .rp-stool { width: 84px; height: 58px; font-size: 22px; }
+  .rp-stools { gap: 12px; }
+  .rp-pool { flex-basis: 96px; }
+  .rp-cols { gap: 16px; }
+  .rp-col { gap: 14px; }
+  .rp-table { height: 108px; }
+  .rp-piece { height: 86px; }
+  .cat-tab { height: 46px; font-size: 16px; padding: 0 18px; }
+}
+
+/* =============================================
+   RESPONSIVE: móviles / portrait
    ============================================= */
 @media (max-width: 680px) {
   .order-content {
@@ -1066,8 +1079,12 @@ input, select { font-family: inherit; }
   .btn-outline, .btn-outline-blue { padding: 0 8px; font-size: 13px; }
   .hbar-row { grid-template-columns: 96px 1fr 64px; }
   .rp-room { flex-direction: column; }
-  .rp-pool { flex-basis: auto; min-height: 64px; flex-direction: row; }
+  .rp-pool { flex-basis: auto; min-height: 60px; flex-direction: row; gap: 16px; }
   .rp-pool-label { writing-mode: horizontal-tb; }
-  .rp-cols { gap: 14px; }
+  .rp-cols { gap: 12px; }
   .rp-col { gap: 12px; }
+  .rp-stool { width: 64px; height: 50px; font-size: 19px; }
+  .rp-stools { gap: 10px; }
+  .rp-table { height: 96px; }
+  .rp-piece { height: 78px; }
 }

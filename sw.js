@@ -2,11 +2,11 @@
    Estrategia: cache-first para el "app shell" con actualización en segundo plano.
    Esto permite abrir y usar la app sin conexión. */
 
-const CACHE = 'barpiscina-v9'
+const CACHE = 'barpiscina-v10'
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=11',
+  './styles.css?v=12',
   './app.js?v=11',
   './manifest.json',
   './icon.svg',

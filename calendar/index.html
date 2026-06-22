@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nosotros">
+  <meta name="theme-color" content="#6D28D9">
+  <title>Nosotros · Calendario</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== PANTALLA: CARGANDO ===== -->
+<div id="screen-loading" class="screen active">
+  <div class="loading-wrap">
+    <div class="loading-emoji">💑</div>
+    <div class="loading-title">Nosotros</div>
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: AUTH ===== -->
+<div id="screen-auth" class="screen">
+  <div class="auth-hero">
+    <div class="auth-emoji">💑</div>
+    <h1>Nosotros</h1>
+    <p>Tu calendario compartido</p>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Entrar</button>
+      <button class="auth-tab" data-tab="register">Registrarse</button>
+    </div>
+
+    <!-- Login -->
+    <form id="form-login" class="auth-form">
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <p class="auth-error" id="login-error"></p>
+      <button type="submit" class="btn-primary btn-full">Entrar</button>
+    </form>
+
+    <!-- Register -->
+    <form id="form-register" class="auth-form hidden">
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" id="reg-name" placeholder="María" required maxlength="30">
+      </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@correo.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="reg-password" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Elige tu color</label>
+        <div class="color-picker" id="reg-color-picker"></div>
+      </div>
+      <p class="auth-error" id="reg-error"></p>
+      <button type="submit" class="btn-primary btn-full">Crear cuenta</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: VINCULAR PAREJA ===== -->
+<div id="screen-pair" class="screen">
+  <div class="pair-header">
+    <div class="pair-emoji">🔗</div>
+    <h2>Vincula tu pareja</h2>
+    <p>Comparte tu código o introduce el de tu pareja para sincronizar el calendario</p>
+  </div>
+
+  <div class="pair-card">
+    <div class="pair-section">
+      <h3>Tu código de invitación</h3>
+      <div class="invite-code-box">
+        <span id="my-invite-code">···</span>
+        <button class="btn-copy" id="btn-copy-code" title="Copiar">⎘</button>
+      </div>
+      <p class="hint">Comparte este código con tu pareja</p>
+    </div>
+
+    <div class="divider-text">— o —</div>
+
+    <div class="pair-section">
+      <h3>Introduce el código de tu pareja</h3>
+      <div class="join-row">
+        <input type="text" id="partner-code-input" placeholder="Código de 20 caracteres" maxlength="28">
+        <button class="btn-primary" id="btn-join-couple">Unir</button>
+      </div>
+      <p class="auth-error" id="pair-error"></p>
+    </div>
+
+    <button class="btn-ghost btn-full" id="btn-skip-pair">Usar solo por ahora</button>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: APP PRINCIPAL ===== -->
+<div id="screen-app" class="screen">
+
+  <!-- Cabecera dinámica -->
+  <header class="app-header" id="app-header">
+    <div class="header-top">
+      <div class="header-greeting">
+        <div class="greeting-text" id="greeting-text">Buenos días</div>
+        <div class="greeting-date" id="greeting-date"></div>
+      </div>
+      <div class="header-avatars" id="header-avatars"></div>
+    </div>
+  </header>
+
+  <!-- Contenido páginas -->
+  <main class="app-main" id="app-main">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <section class="section">
+        <div class="section-header">
+          <h2>Hoy</h2>
+          <span class="section-date" id="today-label"></span>
+        </div>
+        <div id="today-events" class="events-timeline"></div>
+        <div id="today-empty" class="empty-state hidden">
+          <div class="empty-icon">☀️</div>
+          <p>Sin eventos para hoy.<br>¡Disfruta el día!</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2>Próximos 7 días</h2>
+        </div>
+        <div id="upcoming-events" class="events-list"></div>
+        <div id="upcoming-empty" class="empty-state hidden">
+          <div class="empty-icon">🗓️</div>
+          <p>Sin eventos próximos</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- CALENDARIO -->
+    <div id="page-calendar" class="page">
+      <div class="calendar-nav">
+        <button class="btn-icon" id="cal-prev">‹</button>
+        <div class="calendar-month-label" id="cal-month-label"></div>
+        <button class="btn-icon" id="cal-next">›</button>
+      </div>
+      <div class="calendar-grid-header">
+        <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-day-events">
+        <div class="section-header">
+          <h2 id="cal-selected-label">Selecciona un día</h2>
+        </div>
+        <div id="cal-day-events" class="events-list"></div>
+        <div id="cal-day-empty" class="empty-state hidden">
+          <div class="empty-icon">📅</div>
+          <p>Sin eventos este día</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAREAS -->
+    <div id="page-tasks" class="page">
+      <div class="tasks-filters" id="tasks-filters">
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="today">Hoy</button>
+        <button class="filter-btn" data-filter="week">Esta semana</button>
+        <button class="filter-btn" data-filter="done">Completadas</button>
+      </div>
+      <div id="tasks-list" class="tasks-list"></div>
+      <div id="tasks-empty" class="empty-state hidden">
+        <div class="empty-icon">✅</div>
+        <p>Sin tareas pendientes</p>
+      </div>
+    </div>
+
+    <!-- AJUSTES -->
+    <div id="page-settings" class="page">
+      <div class="settings-profile" id="settings-profile-card"></div>
+
+      <div class="settings-group">
+        <div class="settings-item" id="settings-couple-info"></div>
+        <button class="settings-item settings-btn" id="btn-notifications">
+          <span class="settings-icon">🔔</span>
+          <span class="settings-label">Activar notificaciones</span>
+          <span class="settings-arrow">›</span>
+        </button>
+        <button class="settings-item settings-btn" id="btn-install">
+          <span class="settings-icon">📲</span>
+          <span class="settings-label">Instalar en dispositivo</span>
+          <span class="settings-arrow">›</span>
+        </button>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item">
+          <span class="settings-icon">ℹ️</span>
+          <span class="settings-label">Versión 1.0 · Nosotros</span>
+        </div>
+      </div>
+
+      <button class="btn-danger btn-full" id="btn-logout">Cerrar sesión</button>
+    </div>
+
+  </main>
+
+  <!-- Barra de navegación inferior -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="dashboard">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-btn" data-page="calendar">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Calendario</span>
+    </button>
+    <button class="nav-btn" data-page="tasks">
+      <span class="nav-icon">✅</span>
+      <span class="nav-label">Tareas</span>
+    </button>
+    <button class="nav-btn" data-page="settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- Botón flotante añadir -->
+  <button class="fab" id="fab-add" title="Nuevo evento">+</button>
+
+</div>
+
+<!-- ===== MODAL: EVENTO ===== -->
+<div id="modal-backdrop" class="modal-backdrop hidden">
+  <div class="modal" id="modal-event">
+    <div class="modal-header">
+      <h3 id="modal-title">Nuevo evento</h3>
+      <button class="btn-icon modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-event">
+        <input type="hidden" id="ev-id">
+
+        <div class="field">
+          <label>Título *</label>
+          <input type="text" id="ev-title" placeholder="Ej: Dentista, Comida en casa…" required maxlength="80">
+        </div>
+
+        <div class="field">
+          <label>Categoría</label>
+          <div class="category-grid" id="ev-categories"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Fecha *</label>
+            <input type="date" id="ev-date" required>
+          </div>
+          <div class="field" id="ev-time-field">
+            <label>Hora</label>
+            <input type="time" id="ev-time">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Hora fin</label>
+            <input type="time" id="ev-end-time">
+          </div>
+          <div class="field field-toggle">
+            <label>Todo el día</label>
+            <label class="toggle">
+              <input type="checkbox" id="ev-allday">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Descripción / notas</label>
+          <textarea id="ev-desc" placeholder="Añade detalles…" rows="3" maxlength="400"></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Para quién</label>
+            <select id="ev-assign">
+              <option value="both">Los dos</option>
+              <option value="me">Solo yo</option>
+              <option value="partner">Solo mi pareja</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Recordatorio</label>
+            <select id="ev-reminder">
+              <option value="0">Sin recordatorio</option>
+              <option value="10">10 minutos antes</option>
+              <option value="30">30 minutos antes</option>
+              <option value="60">1 hora antes</option>
+              <option value="1440">1 día antes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Repetir</label>
+          <select id="ev-repeat">
+            <option value="none">Sin repetición</option>
+            <option value="daily">Cada día</option>
+            <option value="weekly">Cada semana</option>
+            <option value="monthly">Cada mes</option>
+            <option value="yearly">Cada año</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-danger-outline hidden" id="btn-delete-event">Eliminar</button>
+          <button type="submit" class="btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

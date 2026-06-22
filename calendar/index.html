@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nosotros ♥">
+  <meta name="theme-color" content="#7C3AED">
+  <title>Nosotros ♥</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div id="screen-loading" class="screen active">
+  <div class="loading-wrap">
+    <div class="loading-emoji">💑</div>
+    <div class="loading-title">Nosotros ♥</div>
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- ===== AUTH ===== -->
+<div id="screen-auth" class="screen">
+  <div class="auth-hero">
+    <div class="auth-emoji">💑</div>
+    <h1>Nosotros ♥</h1>
+    <p>Tu hogar, tu juego, vuestra vida</p>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Entrar</button>
+      <button class="auth-tab" data-tab="register">Registrarse</button>
+    </div>
+    <form id="form-login" class="auth-form">
+      <div class="field"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com" required autocomplete="email"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password"></div>
+      <p class="auth-error" id="login-error"></p>
+      <button type="submit" class="btn-primary btn-full">Entrar 🚀</button>
+    </form>
+    <form id="form-register" class="auth-form hidden">
+      <div class="field"><label>Tu nombre</label><input type="text" id="reg-name" placeholder="María" required maxlength="30"></div>
+      <div class="field"><label>Correo</label><input type="email" id="reg-email" placeholder="tu@correo.com" required autocomplete="email"></div>
+      <div class="field"><label>Contraseña (mín. 6 caracteres)</label><input type="password" id="reg-password" placeholder="••••••••" required minlength="6" autocomplete="new-password"></div>
+      <div class="field"><label>Tu color de avatar</label><div class="color-picker" id="reg-color-picker"></div></div>
+      <p class="auth-error" id="reg-error"></p>
+      <button type="submit" class="btn-primary btn-full">Crear cuenta 🎉</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== PAIR ===== -->
+<div id="screen-pair" class="screen">
+  <div class="pair-header">
+    <div class="pair-emoji">🔗</div>
+    <h2>Vincula tu pareja</h2>
+    <p>Compartid el calendario, puntos y retos</p>
+  </div>
+  <div class="pair-card">
+    <div class="pair-section">
+      <h3>Tu código de invitación</h3>
+      <div class="invite-code-box">
+        <span id="my-invite-code">···</span>
+        <button class="btn-copy" id="btn-copy-code">⎘</button>
+      </div>
+      <p class="hint">Comparte este código con tu pareja</p>
+    </div>
+    <div class="divider-text">— o —</div>
+    <div class="pair-section">
+      <h3>Introduce el código de tu pareja</h3>
+      <div class="join-row">
+        <input type="text" id="partner-code-input" placeholder="Código de 28 caracteres" maxlength="28">
+        <button class="btn-primary" id="btn-join-couple">Unir</button>
+      </div>
+      <p class="auth-error" id="pair-error"></p>
+    </div>
+    <button class="btn-ghost btn-full" id="btn-skip-pair">Usar solo por ahora</button>
+  </div>
+</div>
+
+<!-- ===== APP PRINCIPAL ===== -->
+<div id="screen-app" class="screen">
+
+  <!-- Score Header -->
+  <header class="score-header" id="score-header">
+    <div class="player-side left">
+      <div class="player-avatar-sm" id="hdr-p1-avatar"></div>
+      <div class="player-data">
+        <span class="player-name-sm" id="hdr-p1-name">Tú</span>
+        <span class="player-pts" id="hdr-p1-pts">0 pts</span>
+      </div>
+    </div>
+    <div class="score-center">
+      <div class="week-chip" id="hdr-week"></div>
+      <div class="duel-bar">
+        <div class="duel-fill p1" id="duel-bar-p1"></div>
+        <div class="duel-fill p2" id="duel-bar-p2"></div>
+      </div>
+    </div>
+    <div class="player-side right">
+      <div class="player-data text-right">
+        <span class="player-name-sm" id="hdr-p2-name">Pareja</span>
+        <span class="player-pts" id="hdr-p2-pts">0 pts</span>
+      </div>
+      <div class="player-avatar-sm" id="hdr-p2-avatar"></div>
+    </div>
+  </header>
+
+  <!-- Content pages -->
+  <main class="app-main" id="app-main">
+
+    <!-- INICIO / DASHBOARD -->
+    <div id="page-inicio" class="page active">
+      <div class="quick-actions" id="quick-actions"></div>
+      <section class="section">
+        <div class="section-header"><h2>⚡ Tareas de hoy</h2></div>
+        <div id="dash-tasks"></div>
+        <div id="dash-tasks-empty" class="empty-state hidden"><div class="empty-icon">🎉</div><p>¡Sin tareas pendientes para hoy!</p></div>
+      </section>
+      <section class="section">
+        <div class="section-header"><h2>📸 Últimas fotos graciosas</h2></div>
+        <div id="dash-photos" class="photo-strip"></div>
+        <div id="dash-photos-empty" class="empty-state hidden"><div class="empty-icon">📷</div><p>Completa una tarea con foto<br>y gana puntos extra</p></div>
+      </section>
+      <section class="section">
+        <div class="section-header"><h2>📅 Agenda de hoy</h2></div>
+        <div id="dash-events"></div>
+        <div id="dash-events-empty" class="empty-state hidden"><div class="empty-icon">☀️</div><p>Sin eventos hoy</p></div>
+      </section>
+    </div>
+
+    <!-- TAREAS -->
+    <div id="page-tareas" class="page">
+      <div class="tasks-filters" id="task-filters">
+        <button class="filter-btn active" data-filter="pending">Pendientes</button>
+        <button class="filter-btn" data-filter="mine">Mis tareas</button>
+        <button class="filter-btn" data-filter="theirs">De mi pareja</button>
+        <button class="filter-btn" data-filter="done">Completadas</button>
+      </div>
+      <div id="task-list" class="task-list"></div>
+      <div id="task-empty" class="empty-state hidden"><div class="empty-icon">✅</div><p>Sin tareas aquí</p></div>
+    </div>
+
+    <!-- COMIDA -->
+    <div id="page-comida" class="page">
+      <div class="sub-tabs" id="food-tabs">
+        <button class="sub-tab active" data-sub="compra">🛒 Compra</button>
+        <button class="sub-tab" data-sub="menu">🗓️ Menú</button>
+        <button class="sub-tab" data-sub="recetas">📖 Recetas</button>
+      </div>
+      <!-- Compra -->
+      <div id="sub-compra" class="sub-page active">
+        <div class="add-item-bar">
+          <input type="text" id="shop-input" placeholder="Añadir producto…" maxlength="60">
+          <button class="btn-primary" id="btn-add-shop">+</button>
+        </div>
+        <div id="shop-filters" class="shop-cat-filters"></div>
+        <div id="shop-list"></div>
+        <div id="shop-empty" class="empty-state hidden"><div class="empty-icon">🛒</div><p>Lista vacía, ¡a comprar!</p></div>
+      </div>
+      <!-- Menú semanal -->
+      <div id="sub-menu" class="sub-page">
+        <div class="menu-nav">
+          <button class="btn-icon" id="menu-prev">‹</button>
+          <span id="menu-week-label">Semana del …</span>
+          <button class="btn-icon" id="menu-next">›</button>
+        </div>
+        <div id="menu-grid" class="menu-grid"></div>
+      </div>
+      <!-- Recetas -->
+      <div id="sub-recetas" class="sub-page">
+        <div id="recipe-list" class="recipe-list"></div>
+        <div id="recipe-empty" class="empty-state hidden"><div class="empty-icon">👨‍🍳</div><p>Añadid vuestras recetas favoritas</p></div>
+      </div>
+    </div>
+
+    <!-- AGENDA -->
+    <div id="page-agenda" class="page">
+      <div class="sub-tabs" id="agenda-tabs">
+        <button class="sub-tab active" data-sub="eventos">📅 Eventos</button>
+        <button class="sub-tab" data-sub="recuerdos">🔔 Recordatorios</button>
+      </div>
+      <div id="sub-eventos" class="sub-page active">
+        <div class="calendar-nav">
+          <button class="btn-icon" id="cal-prev">‹</button>
+          <div class="calendar-month-label" id="cal-month-label"></div>
+          <button class="btn-icon" id="cal-next">›</button>
+        </div>
+        <div class="calendar-grid-header"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="section-header mt-12"><h2 id="cal-selected-label">Selecciona un día</h2></div>
+        <div id="cal-day-events" class="events-list"></div>
+        <div id="cal-day-empty" class="empty-state hidden"><div class="empty-icon">📅</div><p>Sin eventos este día</p></div>
+      </div>
+      <div id="sub-recuerdos" class="sub-page">
+        <div id="reminder-list" class="reminder-list"></div>
+        <div id="reminder-empty" class="empty-state hidden"><div class="empty-icon">🔔</div><p>Sin recordatorios activos</p></div>
+      </div>
+    </div>
+
+    <!-- NOSOTROS -->
+    <div id="page-nosotros" class="page">
+      <div id="ranking-card" class="ranking-card"></div>
+      <section class="section">
+        <div class="section-header"><h2>🎁 Tienda de recompensas</h2><button class="btn-sm" id="btn-add-reward">+ Añadir</button></div>
+        <div id="reward-list" class="reward-list"></div>
+      </section>
+      <section class="section">
+        <div class="section-header"><h2>🏆 Historial de canjes</h2></div>
+        <div id="redemption-list"></div>
+        <div id="redemption-empty" class="empty-state hidden"><div class="empty-icon">🎖️</div><p>Aún sin canjes</p></div>
+      </section>
+      <div class="settings-group mt-16">
+        <div class="settings-item" id="nos-profile"></div>
+        <button class="settings-item settings-btn" id="btn-notifications"><span class="settings-icon">🔔</span><span class="settings-label">Activar notificaciones</span><span class="settings-arrow">›</span></button>
+        <button class="settings-item settings-btn" id="btn-install"><span class="settings-icon">📲</span><span class="settings-label">Instalar app</span><span class="settings-arrow">›</span></button>
+        <button class="settings-item settings-btn" id="btn-logout"><span class="settings-icon">🚪</span><span class="settings-label">Cerrar sesión</span><span class="settings-arrow">›</span></button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="inicio"><span class="nav-icon">🏠</span><span class="nav-label">Inicio</span></button>
+    <button class="nav-btn" data-page="tareas"><span class="nav-icon">✅</span><span class="nav-label">Tareas</span></button>
+    <button class="nav-btn" data-page="comida"><span class="nav-icon">🍽️</span><span class="nav-label">Comida</span></button>
+    <button class="nav-btn" data-page="agenda"><span class="nav-icon">📅</span><span class="nav-label">Agenda</span></button>
+    <button class="nav-btn" data-page="nosotros"><span class="nav-icon">👑</span><span class="nav-label">Nosotros</span></button>
+  </nav>
+
+  <button class="fab" id="fab-add">+</button>
+
+</div>
+
+<!-- ===== MODAL UNIVERSAL ===== -->
+<div id="modal-backdrop" class="modal-backdrop hidden">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">·</h3>
+      <button class="btn-icon modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"><!-- content injected by JS --></div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

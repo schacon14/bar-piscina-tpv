@@ -1,124 +1,144 @@
-# Nosotros · Calendario compartido 💑
+# Nosotros ♥ · Calendario compartido para parejas
 
-App PWA de calendario y tareas para parejas, con sincronización en tiempo real.
+App PWA de calendario, tareas con fotos, lista de la compra, menú semanal y sistema de puntos para parejas. Sincronización en tiempo real con Firebase.
 
 ## Funciones
 
-- **Sincronización en tiempo real** — ambos ven los cambios al instante (Firebase Firestore)
-- **Dashboard** — eventos de hoy + próximos 7 días
-- **Calendario** — vista mensual con puntos de colores por categoría
-- **Tareas** — lista filtrable (hoy / semana / completadas)
-- **10 categorías** — Comidas, Salud, Dentista, Hogar, Trabajo, Compras, Familia, Ocio, Farmacia, Otros
-- **Recordatorios** — notificaciones nativas del navegador
-- **PWA** — se instala en móvil y funciona offline (excepto la sincronización)
-- **Responsive** — móvil, tablet y escritorio
+- **5 secciones**: Inicio/Dashboard · Tareas · Comida · Agenda · Nosotros
+- **Sistema de puntos gamificado**: tareas +15 pts, con foto +30 pts, reacciones partner +5 pts
+- **Ranking semanal** con barra de duelo en tiempo real
+- **Tienda de recompensas** personalizable (besos, masajes, salidas, etc.)
+- **Fotos de tareas** con compresión automática y reacciones emoji
+- **Lista de la compra** con categorías
+- **Menú semanal** (desayuno/comida/cena por día)
+- **Recetario compartido**
+- **Calendário + eventos** con categorías
+- **Recordatorios** recurrentes
+- **Sincronización en tiempo real** (Firebase Firestore)
+- **PWA** — instalable, funciona offline
 
 ---
 
-## Puesta en marcha
+## Configuración en 6 pasos
 
-### 1. Crear proyecto en Firebase
+### 1. Crear proyecto Firebase
 
 1. Ve a [console.firebase.google.com](https://console.firebase.google.com)
-2. Crea un proyecto (p.ej. `nosotros-calendario`)
-3. En el proyecto, haz clic en **⚙️ Configuración del proyecto → Tus apps → `</>`** (web)
-4. Dale un nombre (p.ej. `nosotros-web`) y haz clic en **Registrar app**
-5. Copia el objeto `firebaseConfig` que aparece
+2. **Crear proyecto** → nombre ej: `nosotros-app`
+3. **Configuración → Tus apps → `</>`** (web) → nombre ej: `nosotros-web` → **Registrar**
+4. Copia el objeto `firebaseConfig`
 
-### 2. Configurar la app
-
-Abre `calendar/firebase-config.js` y sustituye los valores:
+### 2. Editar firebase-config.js
 
 ```js
 export const firebaseConfig = {
   apiKey:            "AIzaSy...",
-  authDomain:        "nosotros-calendario.firebaseapp.com",
-  projectId:         "nosotros-calendario",
-  storageBucket:     "nosotros-calendario.firebasestorage.app",
-  messagingSenderId: "1234567890",
-  appId:             "1:1234567890:web:abc123"
+  authDomain:        "nosotros-app.firebaseapp.com",
+  projectId:         "nosotros-app",
+  storageBucket:     "nosotros-app.firebasestorage.app",
+  messagingSenderId: "123456789",
+  appId:             "1:123:web:abc"
 };
 ```
 
 ### 3. Activar Authentication
 
-En Firebase Console → **Authentication → Sign-in method → Correo/contraseña → Activar**
+**Authentication → Sign-in method → Correo/contraseña → Activar ✓**
 
 ### 4. Crear base de datos Firestore
 
-En Firebase Console → **Firestore Database → Crear base de datos → Modo producción**
+**Firestore Database → Crear base de datos → Modo producción**
 
-### 5. Reglas de seguridad Firestore
+### 5. Activar Firebase Storage (para fotos de tareas)
 
-En **Firestore → Reglas**, pega esto y haz clic en **Publicar**:
+**Storage → Comenzar → Modo producción**
+
+### 6. Reglas de Firestore y Storage
+
+**Firestore → Reglas** — pegar y publicar:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
     match /users/{uid} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == uid;
     }
-
     match /couples/{coupleId} {
-      allow read:   if request.auth != null
-                    && request.auth.uid in resource.data.members;
+      allow read:   if request.auth != null && request.auth.uid in resource.data.members;
       allow create: if request.auth != null;
-      allow update: if request.auth != null
-                    && request.auth.uid in resource.data.members;
-      allow delete: if request.auth != null
-                    && request.auth.uid in resource.data.members;
+      allow update: if request.auth != null && request.auth.uid in resource.data.members;
+      allow delete: if request.auth != null && request.auth.uid in resource.data.members;
     }
+    function coupleId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coupleId;
+    }
+    match /tasks/{id}        { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /events/{id}       { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /shoppingItems/{id}{ allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /recipes/{id}      { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /reminders/{id}    { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /rewards/{id}      { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /redemptions/{id}  { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+    match /weeklyMenu/{id}   { allow read,write: if request.auth!=null && (resource==null || resource.data.coupleId==coupleId()); allow create: if request.auth!=null && request.resource.data.coupleId==coupleId(); }
+  }
+}
+```
 
-    match /events/{eventId} {
-      allow read, write: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid))
-             .data.coupleId == resource.data.coupleId;
-      allow create: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid))
-             .data.coupleId == request.resource.data.coupleId;
+**Storage → Reglas**:
+
+```
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /photos/{coupleId}/{allPaths=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
 ```
 
-### 6. Desplegar
+---
 
-**GitHub Pages (recomendado):**
+## Despliegue en GitHub Pages
+
 ```
 Settings → Pages → Source: Deploy from branch → main → /calendar → Save
 ```
-La app estará en: `https://TU-USUARIO.github.io/bar-piscina-tpv/calendar/`
+
+URL: `https://TU-USUARIO.github.io/bar-piscina-tpv/calendar/`
 
 **En local:**
 ```bash
-cd bar-piscina-tpv
 python3 -m http.server 3456
 # Abre http://localhost:3456/calendar/
 ```
 
 ---
 
-## Uso por la pareja
+## Sistema de puntos
 
-1. **Persona A** crea una cuenta → va automáticamente a la pantalla de vinculación
-2. **Persona A** comparte su código de invitación
-3. **Persona B** crea su cuenta → introduce el código de Persona A → quedan vinculadas
-4. A partir de ahí, ambas ven el mismo calendario en tiempo real
+| Acción | Puntos |
+|---|---|
+| Completar tarea | +15 ⭐ |
+| Completar tarea con foto | +30 ⭐ |
+| Reacción de tu pareja a tu foto | +5 ⭐ |
+| Recompensas (configurables) | -20 a -150 ⭐ |
+
+Los puntos se resetean cada lunes. El historial total siempre crece.
 
 ---
 
-## Estructura de archivos
+## Archivos
 
 ```
 calendar/
-├── index.html          ← App principal (HTML)
-├── styles.css          ← Estilos
-├── app.js              ← Lógica (Firebase, UI, eventos)
-├── sw.js               ← Service Worker (PWA/offline)
-├── manifest.json       ← Configuración PWA
-├── firebase-config.js  ← Tus credenciales Firebase ← EDITAR ESTO
-└── README.md           ← Esta guía
+├── index.html          ← HTML (5 secciones + modals)
+├── styles.css          ← Estilos (diseño game colorido)
+├── app.js              ← Lógica completa (Firebase, puntos, fotos, UI)
+├── sw.js               ← Service Worker (PWA)
+├── manifest.json       ← Config PWA
+├── firebase-config.js  ← ⚠️ EDITAR CON TUS CREDENCIALES
+└── README.md
 ```
